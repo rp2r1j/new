@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Business Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      background: url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      color: white;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.6);
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    .menu {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+    }
+
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropbtn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .dot {
+      height: 6px;
+      width: 6px;
+      background-color: white;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .dropbtn:hover .dot {
+      background-color: #00d1ff;
+      transform: scale(1.2);
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      margin-top: 10px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      min-width: 200px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      z-index: 99;
+    }
+
+    .dropdown-content a {
+      color: white;
+      padding: 12px 20px;
+      text-decoration: none;
+      display: block;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .dropdown-content a:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .show {
+      display: block !important;
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 10px #fff, 0 0 20px #3498db, 0 0 30px #3498db;
+      }
+      to {
+        text-shadow: 0 0 20px #fff, 0 0 30px #2980b9, 0 0 40px #2980b9;
+      }
+    }
+
+    footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 0.9rem;
+      color: #ddd;
+      text-shadow: 1px 1px 3px black;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="menu">
+    <div class="dropdown">
+      <button class="dropbtn" title="Menu" onclick="toggleMenu()">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </button>
+      <div id="dropdownMenu" class="dropdown-content">
+        <a href="page1.html">Form</a>
+        <a href="page2.html">Full Screen Memo</a>
+        <a href="page3.html">Cash Memo</a>
+        <a href="page4.html">Preview Excel Data</a>
+        <a href="page5.html">Store Data</a>
+        <a href="page6.html">Page 6</a>
+        <a href="page7.html">Page 7</a>
+        <a href="page8.html">Page 8</a>
+        <a href="page9.html">Page 9</a>
+        <a href="page10.html">Page 10</a>
+      </div>
+    </div>
+  </div>
+
+  <h1>Business Billing Dashboard</h1>
+
+  <footer>© 2025 Smart Billing System. All rights reserved.</footer>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById("dropdownMenu");
+      menu.classList.toggle("show");
+    }
+
+    // Optional: Close menu when clicking outside
+    window.addEventListener("click", function(e) {
+      if (!e.target.closest(".dropdown")) {
+        document.getElementById("dropdownMenu").classList.remove("show");
+      }
+    });
+  </script>
+</body>
+</html>

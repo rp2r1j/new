@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Page 5 - Excel View</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 40px;
+      font-family: Arial, sans-serif;
+    }
+    th, td {
+      border: 1px solid #999;
+      padding: 6px 10px;
+      text-align: left;
+    }
+    .delete-btn {
+      background-color: red;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .section {
+      margin-bottom: 50px;
+    }
+    .top-buttons {
+      margin-bottom: 20px;
+    }
+    .top-buttons button {
+      background-color: green;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    .clear-btn {
+      background-color: #cc0000;
+    }
+  </style>
+</head>
+<body>
+  <h2>Submitted Entries</h2>
+  <div class="top-buttons">
+    <button onclick="downloadExcel()">Download Excel</button>
+    <button class="clear-btn" onclick="clearAll()">Clear All</button>
+  </div>
+  <div id="dataContainer"></div>
+
+  <script>
+    function loadData() {
+      const container = document.getElementById("dataContainer");
+      container.innerHTML = "";
+      const submittedData = JSON.parse(localStorage.getItem("submittedData")) || [];
+
+      submittedData.forEach((entry, index) => {
+        const section = document.createElement("div");
+        section.classList.add("section");
+
+        let tableHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Customer Name</th>
+                <th>Item Name</th>
+                <th>Weight</th>
+                <th>Rate</th>
+                <th>Total</th>
+                <th>Total Amount (A1)</th>
+                <th>Cash (B1)</th>
+                <th>Online (C1)</th>
+                <th>Dues (D1)</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        entry.items.forEach((item, i) => {
+          tableHTML += `
+            <tr>
+              <td>${i === 0 ? entry.date : ""}</td>
+              <td>${i === 0 ? entry.customerName : ""}</td>
+              <td>${item.item}</td>
+              <td>${item.weight}</td>
+              <td>${item.rate}</td>
+              <td>${item.total}</td>
+              <td>${i === 0 ? entry.totalAmount : ""}</td>
+              <td>${i === 0 ? entry.cash : ""}</td>
+              <td>${i === 0 ? entry.online : ""}</td>
+              <td>${i === 0 ? entry.dues : ""}</td>
+            </tr>
+          `;
+        });
+
+        tableHTML += `
+            </tbody>
+          </table>
+          <button class="delete-btn" onclick="deleteEntry(${index})">Delete</button>
+        `;
+
+        section.innerHTML = tableHTML;
+        container.appendChild(section);
+      });
+    }
+
+    function deleteEntry(index) {
+      const submittedData = JSON.parse(localStorage.getItem("submittedData")) || [];
+      submittedData.splice(index, 1);
+      localStorage.setItem("submittedData", JSON.stringify(submittedData));
+      loadData();
+    }
+
+    function clearAll() {
+      if (confirm("Kya aap sure hain? Ye sab data delete kar dega.")) {
+        localStorage.removeItem("submittedData");
+        loadData();
+      }
+    }
+
+    function downloadExcel() {
+      const submittedData = JSON.parse(localStorage.getItem("submittedData")) || [];
+      const rows = [["Date", "Customer Name", "Item", "Weight", "Rate", "Total", "Total Amount", "Cash", "Online", "Dues"]];
+
+      submittedData.forEach(entry => {
+        entry.items.forEach((item, i) => {
+          rows.push([
+            i === 0 ? entry.date : "",
+            i === 0 ? entry.customerName : "",
+            item.item,
+            item.weight,
+            item.rate,
+            item.total,
+            i === 0 ? entry.totalAmount : "",
+            i === 0 ? entry.cash : "",
+            i === 0 ? entry.online : "",
+            i === 0 ? entry.dues : ""
+          ]);
+        });
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Data");
+      XLSX.writeFile(wb, "submitted_data.xlsx");
+    }
+
+    window.onload = loadData;
+  </script>
+</body>
+</html>

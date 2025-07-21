@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=210mm, initial-scale=1.0" />
+<title>Page 3 - Two Memo Boxes</title>
+<style>
+  @page { size: A4; margin: 0; }
+  html, body {
+    margin: 0; padding: 0;
+    width: 210mm; height: 594mm;
+    overflow: hidden;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+  }
+  .memo-box {
+    width: 50%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 5mm;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    background: white;
+  }
+  .btx { border: none; 
+        float: right;
+        width: 80px;
+
+  }
+  #continueBtn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  .ara{
+    float: right;
+
+
+  }
+</style>
+</head>
+<body>
+  <div class="memo-box" id="memoBox1"></div>
+  <div class="memo-box" id="memoBox2"></div>
+  <button id="continueBtn">Continue</button>
+
+<script>
+  const page2HTML = `
+    <div class="memo">
+      <div class="memo-header">
+        <h2>Cash Memo</h2>
+        <p id="memo-date"></p>
+      </div>
+      <div class="customer-info">
+        <p id="customer-name"></p>
+      </div>
+      <div id="memo-details"></div>
+      <div id="middleInputs">
+        <b Class="ara">  LC : <input type="number" class="btx" id="middleInput" placeholder="LC" /></b><br>
+        <b Class="ara">   B/dues:<input type="number" class="btx" id="backDuesInput" placeholder="Back Dues" />
+      </div></b><br>
+      <b Class="ara">   
+      <div id="total-amount">Grand Total: ₹0.00</div><b>
+      <div id="paymentInputs">
+        
+        Cash: <input type="number" class="btx" id="cashInput" placeholder="Cash" /><br>
+        Online: <input type="number" class="btx" id="onlineInput" placeholder="Online" />
+      </div>
+      <div id="balance-due">Balance Due: ₹0.00</div>
+    </div>
+  `;
+
+  document.getElementById("memoBox1").innerHTML = page2HTML;
+  document.getElementById("memoBox2").innerHTML = page2HTML;
+
+  function fillCashMemo(containerId) {
+    const container = document.getElementById(containerId);
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // ONLY take liveDate from URL, no fallback to current time
+    let liveDate = urlParams.get("liveDate");
+    if (!liveDate) {
+      liveDate = "";  // blank if not passed
+    } else {
+      liveDate = decodeURIComponent(liveDate);
+    }
+    
+    const customerName = urlParams.get("customerName") || "";
+    const items = urlParams.getAll("item[]");
+    const weights = urlParams.getAll("weight[]");
+    const rates = urlParams.getAll("rate[]");
+
+    container.querySelector("#memo-date").textContent = `Date & Time: ${liveDate}`;
+    container.querySelector("#customer-name").textContent = `Customer Name: ${decodeURIComponent(customerName)}`;
+
+    let tableHTML = `<table style="width:100%; border-collapse: collapse; margin-top:10px;">
+      <thead><tr><th>Item</th><th>Weight (kg)</th><th>Rate</th><th>Total</th></tr></thead><tbody>`;
+
+    let grandTotal = 0;
+    let totalWeight = 0;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const weight = parseFloat(weights[i]) || 0;
+      const rate = parseFloat(rates[i]) || 0;
+      const total = (weight * rate).toFixed(2);
+      tableHTML += `<tr><td>${item}</td><td>${weight}</td><td>${rate}</td><td>${total}</td></tr>`;
+      grandTotal += parseFloat(total);
+      totalWeight += weight;
+    }
+
+    tableHTML += `<tr><td><strong>Total</strong></td><td><strong>${totalWeight.toFixed(2)} kg</strong></td><td></td><td><strong>${grandTotal.toFixed(2)}</strong></td></tr></tbody></table>`;
+    container.querySelector("#memo-details").innerHTML = tableHTML;
+
+    function updateAllTotals() {
+      const lc = parseFloat(container.querySelector("#middleInput").value) || 0;
+      const backDues = parseFloat(container.querySelector("#backDuesInput").value) || 0;
+      const cash = parseFloat(container.querySelector("#cashInput").value) || 0;
+      const online = parseFloat(container.querySelector("#onlineInput").value) || 0;
+
+      const newTotal = grandTotal + lc + backDues;
+      const paid = cash + online;
+      const due = newTotal - paid;
+
+      container.querySelector("#total-amount").textContent = `Grand Total: ₹${newTotal.toFixed(2)}`;
+      container.querySelector("#balance-due").textContent = `Balance Due: ₹${due.toFixed(2)}`;
+    }
+
+    ["middleInput", "backDuesInput", "cashInput", "onlineInput"].forEach(id => {
+      const input = container.querySelector(`#${id}`);
+      input.addEventListener("input", updateAllTotals);
+      input.addEventListener("input", () => {
+        const other = containerId === "memoBox1" ? "memoBox2" : "memoBox1";
+        const otherInput = document.getElementById(other).querySelector(`#${id}`);
+        otherInput.value = input.value;
+        otherInput.dispatchEvent(new Event("input"));
+      });
+    });
+
+    updateAllTotals();
+  }
+
+  fillCashMemo("memoBox1");
+  fillCashMemo("memoBox2");
+
+  // Continue Button Logic
+  document.getElementById("continueBtn").addEventListener("click", function () {
+    const box = document.getElementById("memoBox1");
+    const getVal = id => {
+      const el = box.querySelector(`#${id}`);
+      return el ? encodeURIComponent(el.value || "0") : "0";
+    };
+
+    const itemEls = box.querySelectorAll("table tbody tr td:nth-child(1)");
+    const weightEls = box.querySelectorAll("table tbody tr td:nth-child(2)");
+    const rateEls = box.querySelectorAll("table tbody tr td:nth-child(3)");
+
+    const items = [], weights = [], rates = [];
+    for (let i = 0; i < itemEls.length - 1; i++) {
+      items.push(`item[]=${encodeURIComponent(itemEls[i].textContent)}`);
+      weights.push(`weight[]=${encodeURIComponent(weightEls[i].textContent)}`);
+      rates.push(`rate[]=${encodeURIComponent(rateEls[i].textContent)}`);
+    }
+
+    const liveDate = encodeURIComponent(new URLSearchParams(window.location.search).get("liveDate") || "");
+    const customerName = encodeURIComponent(new URLSearchParams(window.location.search).get("customerName") || "");
+
+    const params = [
+      ...items,
+      ...weights,
+      ...rates,
+      `lc=${getVal("middleInput")}`,
+      `bdues=${getVal("backDuesInput")}`,
+      `cash=${getVal("cashInput")}`,
+      `online=${getVal("onlineInput")}`,
+      `liveDate=${liveDate}`,
+      `customerName=${customerName}`
+    ];
+
+    const queryString = params.join("&");
+    window.location.href = `page4.html?${queryString}`;
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cash Memo</title>
+  <link rel="stylesheet" href="page2.css" />
+  <style>
+    body { font-family: sans-serif; }
+    .memo {
+      width: 80%;
+      margin: 20px auto;
+      border: 1px solid #ccc;
+      padding: 20px;
+    }
+    .memo-header { text-align: center; margin-bottom: 15px; }
+    .customer-info { margin-bottom: 10px; }
+    .memo-details-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    .memo-details-table th, .memo-details-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    .memo-details-table th { background-color: #f2f2f2; }
+    #middleInputs, #paymentInputs {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    #middleInputs input, #paymentInputs input {
+      width: 100px;
+      padding: 5px;
+    }
+    #total-amount, #balance-due {
+      font-weight: bold;
+      margin-top: 10px;
+      text-align: right;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    #memo-container {
+      border: 2px solid #888;
+      padding: 10px;
+      margin-bottom: 20px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="memo" id="memo-container">
+    <div class="memo-header">
+      <h2>Cash Memo</h2>
+      <p id="memo-date">Date & Time: --</p>
+    </div>
+
+    <div class="customer-info">
+      <p id="customer-name"></p>
+    </div>
+
+    <div id="memo-details"></div>
+
+    <!-- LC and Back Dues -->
+    <div id="middleInputs">
+      <input type="number" id="middleInput" placeholder="LC" />
+      <input type="number" id="backDuesInput" placeholder="Back Dues" />
+    </div>
+
+    <div id="total-amount">Grand Total: ₹0.00</div>
+
+    <!-- Cash and Online -->
+    <div id="paymentInputs">
+      <input type="number" id="cashInput" placeholder="Cash" />
+      <input type="number" id="onlineInput" placeholder="Online" />
+    </div>
+
+    <div id="balance-due">Balance Due: ₹0.00</div>
+
+    <button onclick="window.print()">Print</button>
+    <button id="submitButton">Submit to Sheet</button>
+  </div>
+
+  <!-- Continue Button to go to page3 -->
+  <div style="text-align:center; margin-top:20px;">
+    <button id="continueBtn">Continue to Page 3</button>
+  </div>
+
+  <script>
+    // URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const customerName = urlParams.get("customerName") || "";
+    const items = urlParams.getAll("item[]");
+    const weights = urlParams.getAll("weight[]");
+    const rates = urlParams.getAll("rate[]");
+
+    // Display customer name
+    document.getElementById("customer-name").textContent = customerName ? `Customer Name: ${decodeURIComponent(customerName)}` : "";
+
+    // Generate live date & time with seconds and display
+    function getCurrentDateTime() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const h = String(now.getHours()).padStart(2, '0');
+      const min = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      return `${y}-${m}-${d} ${h}:${min}:${s}`;
+    }
+
+    // Set initial date-time
+    function updateDateTime() {
+      document.getElementById("memo-date").textContent = "Date & Time: " + getCurrentDateTime();
+    }
+    updateDateTime();
+
+    // Optional: Update every second (if you want live ticking time)
+    setInterval(updateDateTime, 1000);
+
+    // Build items table
+    const memoDetailsDiv = document.getElementById("memo-details");
+    let tableHTML = `<table class="memo-details-table">
+                      <thead>
+                        <tr><th>Item</th><th>Weight (kg)</th><th>Rate</th><th>Total</th></tr>
+                      </thead><tbody>`;
+
+    let grandTotal = 0;
+    let totalWeight = 0;
+    let itemData = [];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const weight = parseFloat(weights[i]) || 0;
+      const rate = parseFloat(rates[i]) || 0;
+      const total = (weight * rate).toFixed(2);
+      tableHTML += `<tr><td>${item}</td><td>${weight}</td><td>${rate}</td><td>${total}</td></tr>`;
+      grandTotal += parseFloat(total);
+      totalWeight += weight;
+
+      itemData.push({ item, weight, rate, total });
+    }
+
+    tableHTML += `<tr>
+                    <td><strong>Total</strong></td>
+                    <td><strong>${totalWeight.toFixed(2)} kg</strong></td>
+                    <td></td>
+                    <td><strong>${grandTotal.toFixed(2)}</strong></td>
+                  </tr></tbody></table>`;
+    memoDetailsDiv.innerHTML = tableHTML;
+
+    // Calculations for LC, Back Dues, Cash, Online
+    function updateAllTotals() {
+      const lc = parseFloat(document.getElementById("middleInput").value) || 0;
+      const backDues = parseFloat(document.getElementById("backDuesInput").value) || 0;
+      const cash = parseFloat(document.getElementById("cashInput").value) || 0;
+      const online = parseFloat(document.getElementById("onlineInput").value) || 0;
+
+      const newTotal = grandTotal + lc + backDues;
+      const paid = cash + online;
+      const due = newTotal - paid;
+
+      document.getElementById("total-amount").textContent = `Grand Total: ₹${newTotal.toFixed(2)}`;
+      document.getElementById("balance-due").textContent = `Balance Due: ₹${due.toFixed(2)}`;
+    }
+
+    ["middleInput", "backDuesInput", "cashInput", "onlineInput"].forEach(id => {
+      document.getElementById(id).addEventListener("input", updateAllTotals);
+    });
+
+    updateAllTotals();
+
+    // Submit to Google Sheet
+    document.getElementById("submitButton").addEventListener("click", function () {
+      const data = {
+        liveDateTime: document.getElementById("memo-date").textContent.replace("Date & Time: ", ""),
+        customerName: decodeURIComponent(customerName),
+        items: itemData,
+        totalWeight: totalWeight.toFixed(2),
+        grandTotal: (grandTotal + 
+                     (parseFloat(document.getElementById("middleInput").value) || 0) +
+                     (parseFloat(document.getElementById("backDuesInput").value) || 0)).toFixed(2),
+        lc: document.getElementById("middleInput").value || "0",
+        backDues: document.getElementById("backDuesInput").value || "0",
+        cash: document.getElementById("cashInput").value || "0",
+        online: document.getElementById("onlineInput").value || "0",
+        balanceDue: (() => {
+          const newTotal = grandTotal + 
+            (parseFloat(document.getElementById("middleInput").value) || 0) +
+            (parseFloat(document.getElementById("backDuesInput").value) || 0);
+          const paid = 
+            (parseFloat(document.getElementById("cashInput").value) || 0) +
+            (parseFloat(document.getElementById("onlineInput").value) || 0);
+          return (newTotal - paid).toFixed(2);
+        })()
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycbxqRMTkpCqjLH0fQjqgLupgiHhXi7ClgoUkutdJTu84a0bOp9X2RIoIKoH46ydd3wE/exec", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.result === "success") {
+          alert("Data submitted successfully to Google Sheet!");
+        } else {
+          alert("Error submitting data: " + res.message);
+        }
+      })
+      .catch(err => alert("Fetch error: " + err));
+    });
+
+    // Continue button to page3 with date-time in URL
+    document.getElementById("continueBtn").addEventListener("click", () => {
+      const liveDateTime = document.getElementById("memo-date").textContent.replace("Date & Time: ", "");
+      const url = new URL(window.location.href);
+
+      url.searchParams.set("liveDateTime", encodeURIComponent(liveDateTime));
+      if(customerName) url.searchParams.set("customerName", encodeURIComponent(customerName));
+
+      // Also pass items, weights, rates as before
+      // Remove old arrays first
+      url.searchParams.delete("item[]");
+      url.searchParams.delete("weight[]");
+      url.searchParams.delete("rate[]");
+
+      for(let i=0; i < items.length; i++) {
+        url.searchParams.append("item[]", items[i]);
+        url.searchParams.append("weight[]", weights[i]);
+        url.searchParams.append("rate[]", rates[i]);
+      }
+
+      window.location.href = "page3.html?" + url.searchParams.toString();
+    });
+  </script>
+</body>
+</html>

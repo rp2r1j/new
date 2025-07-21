@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page 4 - Excel View</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: Arial, sans-serif;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .highlight {
+      font-weight: bold;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Excel Format Table</h2>
+  <table id="excelTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Customer Name</th>
+        <th>Item's Name</th>
+        <th>Weight</th>
+        <th>Rate</th>
+        <th>Total</th>
+        <th>Total Amount</th>
+        <th>Cash</th>
+        <th>Online</th>
+        <th>Dues</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <button onclick="submitData()">Submit</button>
+
+<br><br><br><br><br><br> <a href="page5.html">go to page5</a>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const date = decodeURIComponent(urlParams.get("liveDate") || "");
+    const name = decodeURIComponent(urlParams.get("customerName") || "");
+    const items = urlParams.getAll("item[]");
+    const weights = urlParams.getAll("weight[]");
+    const rates = urlParams.getAll("rate[]");
+    const lc = parseFloat(urlParams.get("lc")) || 0;
+    const backDues = parseFloat(urlParams.get("bdues")) || 0;
+    const cash = parseFloat(urlParams.get("cash")) || 0;
+    const online = parseFloat(urlParams.get("online")) || 0;
+
+    const tbody = document.getElementById("tableBody");
+    const tableData = [];
+    let itemTotal = 0;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const weight = parseFloat(weights[i]) || 0;
+      const rate = parseFloat(rates[i]) || 0;
+      const total = parseFloat((weight * rate).toFixed(2));
+      itemTotal += total;
+
+      tableData.push({ item, weight, rate, total });
+
+      const row = `
+        <tr>
+          <td>${i === 0 ? date : ""}</td>
+          <td>${i === 0 ? name : ""}</td>
+          <td>${item}</td>
+          <td>${weight}</td>
+          <td>${rate}</td>
+          <td>${total}</td>
+          <td ${i === 0 ? 'id="a1"' : ""}></td>
+          <td ${i === 0 ? 'id="b1"' : ""}></td>
+          <td ${i === 0 ? 'id="c1"' : ""}></td>
+          <td ${i === 0 ? 'id="d1"' : ""}></td>
+        </tr>
+      `;
+      tbody.insertAdjacentHTML("beforeend", row);
+    }
+
+    const grandTotal = itemTotal + lc + backDues;
+    const dues = grandTotal - (cash + online);
+
+    document.getElementById("a1").textContent = grandTotal.toFixed(2); // Total
+    document.getElementById("b1").textContent = cash.toFixed(2);       // Cash
+    document.getElementById("c1").textContent = online.toFixed(2);     // Online
+    document.getElementById("d1").textContent = dues.toFixed(2);       // Dues
+
+    // Add LC and Back Dues rows
+    tbody.insertAdjacentHTML("beforeend", `
+      <tr class="highlight">
+        <td></td><td></td><td>LC</td><td></td><td></td><td>${lc.toFixed(2)}</td>
+        <td></td><td></td><td></td><td></td>
+      </tr>
+      <tr class="highlight">
+        <td></td><td></td><td>B/dues</td><td></td><td></td><td>${backDues.toFixed(2)}</td>
+        <td></td><td></td><td></td><td></td>
+      </tr>
+    `);
+
+    function submitData() {
+      const finalData = {
+        date,
+        customerName: name,
+        items: tableData,
+        lc,
+        backDues,
+        totalAmount: grandTotal.toFixed(2),
+        cash: cash.toFixed(2),
+        online: online.toFixed(2),
+        dues: dues.toFixed(2)
+      };
+
+      // Save to localStorage for Page5
+      const allData = JSON.parse(localStorage.getItem("submittedData")) || [];
+      allData.push(finalData);
+      localStorage.setItem("submittedData", JSON.stringify(allData));
+
+      alert("✅ Data saved to Page5 (localStorage)!");
+    }
+  </script>
+</body>
+</html>
