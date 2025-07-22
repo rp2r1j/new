@@ -2,160 +2,158 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Business Dashboard</title>
+  <title>My Shop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    * {
+    body {
       margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
     }
 
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      height: 100vh;
-      background: url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
-      background-size: cover;
+    .header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      font-size: 2rem;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .image-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .image-container img {
+      max-width: 90%;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .message {
+      text-align: center;
+      margin: 20px auto;
+      font-size: 1.2rem;
+      color: #333;
+      max-width: 800px;
+      padding: 10px;
+    }
+
+    .highlight {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+
+    .box-container {
       display: flex;
-      flex-direction: column;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 30px;
+    }
+
+    .custom-section {
+      position: relative;
+      width: 100%;
+      max-width: 300px;
+      height: 300px;
+      color: white;
+      font-size: 1rem;
+      border-radius: 15px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+      padding: 20px;
+      box-sizing: border-box;
+      display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
-      color: white;
       text-align: center;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
     }
 
-    h1 {
-      font-size: 3rem;
-      margin-bottom: 30px;
-      text-shadow: 2px 2px 5px rgba(0,0,0,0.6);
-      animation: glow 2s ease-in-out infinite alternate;
-    }
-
-    .menu {
+    .view-all-btn {
       position: absolute;
-      top: 30px;
-      right: 30px;
-    }
-
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-
-    .dropbtn {
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      align-items: center;
-    }
-
-    .dot {
-      height: 6px;
-      width: 6px;
+      top: 12px;
+      right: 12px;
       background-color: white;
-      border-radius: 50%;
+      color: #e53935;
+      font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       transition: all 0.3s ease;
     }
 
-    .dropbtn:hover .dot {
-      background-color: #00d1ff;
-      transform: scale(1.2);
+    .view-all-btn:hover {
+      background-color: #fce4e4;
     }
 
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      right: 0;
-      margin-top: 10px;
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(10px);
-      border-radius: 12px;
-      min-width: 200px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-      overflow: hidden;
-      z-index: 99;
-    }
-
-    .dropdown-content a {
-      color: white;
-      padding: 12px 20px;
-      text-decoration: none;
-      display: block;
-      font-weight: 500;
-      transition: background 0.2s;
-    }
-
-    .dropdown-content a:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-
-    .show {
-      display: block !important;
-    }
-
-    @keyframes glow {
-      from {
-        text-shadow: 0 0 10px #fff, 0 0 20px #3498db, 0 0 30px #3498db;
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .custom-section {
+        width: 100%;
+        height: auto;
+        min-height: 250px;
       }
-      to {
-        text-shadow: 0 0 20px #fff, 0 0 30px #2980b9, 0 0 40px #2980b9;
+      .message {
+        font-size: 1rem;
+        padding: 0 15px;
+      }
+      .header {
+        font-size: 1.5rem;
       }
     }
 
-    footer {
-      position: absolute;
-      bottom: 20px;
-      font-size: 0.9rem;
-      color: #ddd;
-      text-shadow: 1px 1px 3px black;
+    @media (max-width: 480px) {
+      .box-container {
+        padding: 20px 10px;
+        gap: 15px;
+      }
+      .custom-section {
+        font-size: 0.95rem;
+        padding: 15px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="menu">
-    <div class="dropdown">
-      <button class="dropbtn" title="Menu" onclick="toggleMenu()">
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-      </button>
-      <div id="dropdownMenu" class="dropdown-content">
-        <a href="page1.html">Form</a>
-        <a href="page2.html">Full Screen Memo</a>
-        <a href="page3.html">Cash Memo</a>
-        <a href="page4.html">Preview Excel Data</a>
-        <a href="page5.html">Store Data</a>
-        <a href="page6.html">Page 6</a>
-        <a href="page7.html">Page 7</a>
-        <a href="page8.html">Page 8</a>
-        <a href="page9.html">Page 9</a>
-        <a href="page10.html">Page 10</a>
-      </div>
-    </div>
+  <div class="header">
+    Welcome to My Shop
   </div>
 
-  <h1>Business Billing Dashboard</h1>
+  <div class="image-container">
+    <img src="https://static.vecteezy.com/system/resources/previews/001/822/225/original/group-of-business-people-showing-teamwork-free-vector.jpg" alt="Teamwork Image" />
+  </div>
 
-  <footer>© 2025 Smart Billing System. All rights reserved.</footer>
+  <div class="message">
+    Hamare paas <span class="highlight">100+ anubhavshali welding mistry</span> ki ek majboot team hai jo har project ko perfection ke saath complete karti hai. Aapka bharosa, hamari zimmedari!
+  </div>
 
-  <script>
-    function toggleMenu() {
-      const menu = document.getElementById("dropdownMenu");
-      menu.classList.toggle("show");
-    }
+  <div class="box-container">
 
-    // Optional: Close menu when clicking outside
-    window.addEventListener("click", function(e) {
-      if (!e.target.closest(".dropdown")) {
-        document.getElementById("dropdownMenu").classList.remove("show");
-      }
-    });
-  </script>
+    <div class="custom-section" style="background-image: url('https://source.unsplash.com/300x300/?welding');">
+      <a href="page2.html" class="view-all-btn">View All</a>
+      Welding projects ke real photos — dekhiye kaise kaam hota hai!
+    </div>
+
+    <div class="custom-section" style="background-image: url('https://source.unsplash.com/301x301/?tools');">
+      <a href="page2.html" class="view-all-btn">View All</a>
+      Humare paas modern tools aur trained technicians ki team hai.
+    </div>
+
+    <div class="custom-section" style="background-image: url('https://source.unsplash.com/302x302/?factory');">
+      <a href="page2.html" class="view-all-btn">View All</a>
+      Large-scale projects ke liye industrial setup bhi available hai.
+    </div>
+
+  </div>
+
 </body>
 </html>
